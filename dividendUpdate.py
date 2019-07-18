@@ -1,4 +1,4 @@
-#! Python3
+#!/usr/bin/env python3
 # dividendUpdate.py
 
 # reads a list of tickers from an excel sheet
@@ -8,41 +8,47 @@
 import openpyxl, datetime
 from yahoo_fin import stock_info as si
 
-# load dividend workbook and select active sheet
-divBook = openpyxl.load_workbook('dividendCalc.xlsx')
-divSheet = divBook.active
+# encapsulate in method for command line calls
+def dividendUpdate():
 
-# print start message
-print('Please wait while I update and re-calculate tickers...')
+    # load dividend workbook and select active sheet
+    divBook = openpyxl.load_workbook('dividendCalc.xlsx')
+    divSheet = divBook.active
 
-# check and update each stock ticker
-for row in divSheet:
+    # print start message
+    print('Please wait while I update and re-calculate tickers...')
 
-    # check to see if header or ticker
-    if row[0].value != "Stock ID":
+    # check and update each stock ticker
+    for row in divSheet:
 
-        # store ticker in ticker
-        ticker = row[0].value
+        # check to see if header or ticker
+        if row[0].value != "Stock ID":
 
-        # query and store current price and data dictionary
-        price = si.get_live_price(ticker)
-        div = si.get_quote_table(ticker)['Forward Dividend & Yield'][:4]
+            # store ticker in ticker
+            ticker = row[0].value
 
-        # update spreadsheet with new price and yield info
-        row[1].value = price
-        row[5].value = div
+            # query and store current price and data dictionary
+            price = si.get_live_price(ticker)
+            div = si.get_quote_table(ticker)['Forward Dividend & Yield'][:4]
 
-# collect update date
-now = datetime.datetime.now()
+            # update spreadsheet with new price and yield info
+            row[1].value = price
+            row[5].value = div
 
-# place now string in K1
-divSheet['K1'].value = str(now)
+    # collect update date
+    now = datetime.datetime.now()
 
-# save and close workbook
-divBook.save('dividendCalc.xlsx')
-divBook.close()
+    # place now string in K1
+    divSheet['K1'].value = str(now)
 
-# print end message
-print('Tickers updated!')
+    # save and close workbook
+    divBook.save('dividendCalc.xlsx')
+    divBook.close()
 
-        
+    # print end message
+    print('Tickers updated!')
+
+# statement to run if not imported
+if __name__=="__main__":
+    dividendUpdate()
+            
