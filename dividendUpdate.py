@@ -9,7 +9,7 @@ import openpyxl, datetime
 from yahoo_fin import stock_info as si
 
 # load dividend workbook and select active sheet
-divBook = openpyxl.load_workbook('dividend calc.xlsx')
+divBook = openpyxl.load_workbook('dividendCalc.xlsx')
 divSheet = divBook.active
 
 # print start message
@@ -39,7 +39,7 @@ now = datetime.datetime.now()
 divSheet['K1'].value = str(now)
 
 # save and close workbook
-divBook.save('dividend calc.xlsx')
+divBook.save('dividendCalc.xlsx')
 divBook.close()
 
 # print end message
