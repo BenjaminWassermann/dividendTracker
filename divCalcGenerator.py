@@ -18,18 +18,10 @@ def divCalcGenerator():
     entries = {'A1':'Stock ID',
                'B1':'Price',
                'C1':'Yield',
-               'D1':'Recurrence',
-               'E1':'Yield',
-               'F1':'Annual Yield',
-               'G1':'$stock/$div',
-               'H1':'$stock/$annual',
-               'I1':'Annual yield for $1k',
-               'J1':'Updated:',
-               'C2':'=F2/B2',
-               'E2':'=F2/D2',
-               'G2':'=B2/E2',
-               'H2':'=B2/F2',
-               'I2':'=FLOOR.MATH(1000/B2)*F2'}
+               'D1':'Annual Yield',
+               'E1':'$price/$annual',
+               'F1':'Annual yield for $1k',
+               'G1':'Updated:'}
 
     # create new workbook and select active sheet
     book = openpyxl.Workbook()
