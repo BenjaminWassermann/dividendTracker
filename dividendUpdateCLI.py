@@ -3,10 +3,21 @@
 
 # reads a list of tickers from an excel sheet
 # updates current price and annual yield
+# includes advanced CLI which can generate a sheet,
+# update a sheet, add a single or list of tickers,
+# delete a single or list of tickers
 
 # import statements for openpyxl yahoo_fin datetime click os and math
 import openpyxl, datetime, click, os, math
 from yahoo_fin import stock_info as si
+
+# save lists of dow, nasdaq and other
+dow = si.tickers_dow()
+nasdaq = si.tickers_nasdaq
+other = si.tickers_other
+
+# create list of lists
+exchange = [dow, nasdaq, other]
 
 # start click group, run without command
 @click.group(invoke_without_command=True)
