@@ -4,7 +4,7 @@
 # reads a list of tickers from an excel sheet
 # updates current price and annual yield
 
-# import statements for openpyxl yahoo_fin datetime click and os
+# import statements for openpyxl yahoo_fin datetime click os and math
 import openpyxl, datetime, click, os, math
 from yahoo_fin import stock_info as si
 
@@ -323,7 +323,7 @@ def priceDiv(ticker):
         div = si.get_quote_table(ticker)['Forward Dividend & Yield'][:4]
         return price, div
     except:
-        raise Exception('Ticker %s was not found...' % (ticker))
+        raise Exception('There was a problem updating %s...' % (ticker))
 
 # places data in appropriate cells 
 def placeData(sheet, row, ticker, price, div):
