@@ -126,7 +126,7 @@ def add(ctx, ticker):
         price, div = priceDiv(ticker)
 
         # place data
-        placeData(row, ticker, price, div)
+        placeData(sheet, row, ticker, price, div)
 
         #update date
         updateDate(sheet)
@@ -150,7 +150,7 @@ def add(ctx, ticker):
 @cli.command()
 @click.argument('tickers', nargs=-1)
 @click.pass_context
-def add_list(ctx, tickers):
+def addList(ctx, tickers):
     """Takes a list of tickers and adds them to file_in, saving to file_out"""
 
     file_in = ctx.obj['file_in']
@@ -177,7 +177,7 @@ def add_list(ctx, tickers):
                 price, div = priceDiv(ticker)
 
                 # place data
-                placeData(row, ticker, price, div)
+                placeData(sheet, row, ticker, price, div)
 
                 click.echo('Ticker %s added!' % ticker)
 
@@ -240,7 +240,7 @@ def delete(ctx, ticker):
 @cli.command()
 @click.argument('tickers', nargs=-1)
 @click.pass_context
-def delete_list(ctx, tickers):
+def deleteList(ctx, tickers):
     """Takes a list of tickers and deletes examples from file_in and saves to file_out"""
 
     file_in = ctx.obj['file_in']
@@ -266,7 +266,8 @@ def delete_list(ctx, tickers):
                 click.echo('Ticker %s not found...' % ticker)
 
             else:
-                sheet.delete_rows(row)
+                rowID = row[0].row
+                sheet.delete_rows(rowID)
                 click.echo('%s deleted...' % ticker)
 
     else:
@@ -307,7 +308,7 @@ def dividendUpdate(fileIn, fileOut):
 
             if price is not None:
                 # send data to place data
-                placeData(row, ticker, price, div)
+                placeData(sheet, row, ticker, price, div)
 
             # update count
             count += 1
@@ -333,14 +334,37 @@ def priceDiv(ticker):
         raise Exception('Ticker %s was not found...' % (ticker))
 
 # places data in appropriate cells 
-def placeData(row, ticker, price, div):
+def placeData(sheet, row, ticker, price, div):
+
+    
+    rowID = row[0].row
+    cRow = 'C%s' % rowID
+    eRow = 'E%s' % rowID
+    gRow = 'G%s' % rowID
+    hRow = 'H%s' % rowID
+    iRow = 'I%s' % rowID
+    cFun = '=F%s/B%s' % (rowID, rowID)
+    eFun = '=F%s/D%s' % (rowID, rowID)
+    gFun = '=B%s/E%s' % (rowID, rowID)
+    hFun = '=B%s/F%s' % (rowID, rowID)
+    sheet[cRow].value = cFun
+    sheet[eRow].value = eFun
+    sheet[gRow].value = gFun
+    sheet[hRow].value = hFun
+    
     
     # store ticker in ticker
     row[0].value = ticker
 
+    if row[3].value is None:
+        row[3].value = 4
+
     # update spreadhseet with new price and yield info
     row[1].value = price
-    row[5].value = div    
+    row[5].value = div
+    shares = 1000/price
+    iFun = '=%f * %f' % (float(shares), float(div))
+    sheet[iRow].value = iFun
 
 # takes a sheet formatted for dividend tracking and updates the date
 def updateDate(sheet):
