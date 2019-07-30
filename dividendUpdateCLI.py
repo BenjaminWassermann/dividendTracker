@@ -5,7 +5,7 @@
 # updates current price and annual yield
 
 # import statements for openpyxl yahoo_fin datetime click and os
-import openpyxl, datetime, click, os
+import openpyxl, datetime, click, os, math
 from yahoo_fin import stock_info as si
 
 # start click group, run without command
@@ -65,18 +65,10 @@ def new(ctx):
     entries = {'A1':'Stock ID',
                'B1':'Price',
                'C1':'Yield',
-               'D1':'Recurrence',
-               'E1':'Yield',
-               'F1':'Annual Yield',
-               'G1':'$stock/$div',
-               'H1':'$stock/$annual',
-               'I1':'Annual yield for $1k',
-               'J1':'Updated:',
-               'C2':'=F2/B2',
-               'E2':'=F2/D2',
-               'G2':'=B2/E2',
-               'H2':'=B2/F2',
-               'I2':'=FLOOR.MATH(1000/B2)*F2'}
+               'D1':'Annual Yield',
+               'E1':'$price/$annual',
+               'F1':'Annual yield for $1k',
+               'G1':'Updated:'}
 
     # create new workbook and select active sheet
     book = openpyxl.Workbook()
@@ -336,65 +328,81 @@ def priceDiv(ticker):
 # places data in appropriate cells 
 def placeData(sheet, row, ticker, price, div):
 
-    
+    # aquire the row id number
     rowID = row[0].row
+
+    # generate strings for cols C, E, and F for rowID
     cRow = 'C%s' % rowID
     eRow = 'E%s' % rowID
-    gRow = 'G%s' % rowID
-    hRow = 'H%s' % rowID
-    iRow = 'I%s' % rowID
-    cFun = '=F%s/B%s' % (rowID, rowID)
-    eFun = '=F%s/D%s' % (rowID, rowID)
-    gFun = '=B%s/E%s' % (rowID, rowID)
-    hFun = '=B%s/F%s' % (rowID, rowID)
+    fRow = 'F%s' % rowID
+
+    # generate strings for functions at C[rowID] and E[rowID]
+    cFun = '=D%s/B%s' % (rowID, rowID)
+    eFun = '=B%s/D%s' % (rowID, rowID)
+
+    # place strings for functions at C[rowID] and E[rowID]
     sheet[cRow].value = cFun
-    sheet[eRow].value = eFun
-    sheet[gRow].value = gFun
-    sheet[hRow].value = hFun
-    
+    sheet[eRow].value = eFun    
     
     # store ticker in ticker
     row[0].value = ticker
 
-    if row[3].value is None:
-        row[3].value = 4
-
     # update spreadhseet with new price and yield info
     row[1].value = price
-    row[5].value = div
-    shares = 1000/price
-    iFun = '=%f * %f' % (float(shares), float(div))
-    sheet[iRow].value = iFun
+    row[3].value = div
+
+    # calculate shares per $1000
+    shares = math.floor(1000/price)
+
+    # generate function to calculate annual div yield per $1000 of shares
+    fFun = '=%f * %f' % (float(shares), float(div))
+
+    # places function
+    sheet[fRow].value = fFun
 
 # takes a sheet formatted for dividend tracking and updates the date
 def updateDate(sheet):
+    
     # set update date
     # collect update date
     now = datetime.datetime.now()
     nowShort = str(now)[:9]
 
-    # place now string in K1
-    sheet['K1'].value = str(now)
+    # place now string in H1
+    sheet['H1'].value = str(now)
 
 # returns first empty row
 def availableRow(sheet):
+
+    # count of rows starts at 1
+    # used to count the number of occupied rows
     count = 1
+
+    # iterates through each occupied row in the sheet
     for row in sheet:
+
+        # checks to see if the ticker value for a row is None
         if row[0].value != None:
+
+            # if there is a ticker, increase the count by 1
             count += 1
-    for i in range(1, count):
-        ticker = sheet[i][0].value
-    return sheet[i+1]
+
+    # return sheet[count + 1] 
+    return sheet[count]
         
 # returns first row containing ticker
 def findTicker(sheet, ticker):
 
+    # checks each populated row of the sheet
     for row in sheet:
-        
+
+        # checks to see if the first entry in row matches ticker
         if row[0].value == ticker:
+
+            # returns row if a match is found
             return row
 
-
+    # returns False if no match is found
     return False
 
 if __name__=='__main__':

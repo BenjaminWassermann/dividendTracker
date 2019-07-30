@@ -2,8 +2,8 @@ README for dividendCalc python project
 
 The purpose of this project is to make it easier to track stock prices and dividend yields.
 
-Using openpyxl and yahoo_fin, dividendCalc.py reads in stock tickers (drawn from 'dividendCalc.xlsx'),
-updating the price and dividend yield attributes (to 'dividendCalc.xlsx').
+Using openpyxl and yahoo_fin, dividendCalc.py reads in stock tickers (by default drawn from 'dividendCalc.xlsx'),
+updating the price and dividend yield attributes (by default to 'dividendCalc.xlsx').
 
 Using openpyxl, divCalcGenerator.py creates an excel workbook called 'toFill.xlsx' which is
 formatted with appropriate headers and formulas in the first row.
