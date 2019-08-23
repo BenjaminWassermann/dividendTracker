@@ -18,7 +18,7 @@ nasdaq = si.tickers_nasdaq
 other = si.tickers_other
 
 # create list of lists
-exchange = [dow, nasdaq, other]
+exchanges = {'DOW': dow, 'NASDAQ': nasdaq, 'OTHER': other}
 
 # start click group, run without command
 @click.group(invoke_without_command=True)
@@ -283,6 +283,57 @@ def deleteList(ctx, tickers):
     book.close()
     os.startfile(outPath)
 
+#
+@cli.command()
+@click.argument('exchange', default='all')
+@click.pass_context
+def exchange(ctx, exchange):
+    """Creates a separate workbook for DOW, NASDAQ, and OTHER,
+       does all by default. Use DOW, NASDAQ or OTHER as argument"""
+
+    if exchange == 'all':
+
+        # iterate through all three exchanges
+        for exKey, exVal in exchanges.items():
+
+            # open toFill and select active sheet
+            book = openpyxl.load_workbook('toFill.xlsx')
+            sheet = book.active
+
+            # change sheet name to match exchange name
+            sheet.Name = exKey
+
+            # iterate through tickers in exVal
+            for ticker in exVal:
+
+                # find first available row
+                row = availableRow(sheet)
+
+                # get ticker info
+                price, div = priceDiv(ticker)
+
+                # place data
+                placeData(sheet, row, ticker, price, div)
+
+                #update date
+                updateDate(sheet)
+
+            # save workbook to exKey.xlsx and close book
+            fileName = '%s.xlsx' % exKey
+            book.save(fileName)
+            book.close()
+            
+    else:
+
+        # iterate through only the appropriate exchange
+        if exchange in exchanges:
+
+            # iterate the exchange
+            print(exchange)
+
+        else:
+            print('%s not found, please use DOW, NASDAQ or OTHER only...' % exchange)
+
 # non-cli methods
 
 # dividendUpdate takes two file names as strings
@@ -332,7 +383,14 @@ def dividendUpdate(fileIn, fileOut):
 def priceDiv(ticker):
     try:
         price = si.get_live_price(ticker)
-        div = si.get_quote_table(ticker)['Forward Dividend & Yield'][:4]
+        table = si.get_quote_table(ticker)
+        if 'Forward Dividend & Yield' in table.keys():
+            div = table['Forward Dividend & Yield'][:4]
+        elif 'Yield' in table.keys():
+            div = table['Yield'][:-1]
+        else:
+            print('No dividend yield found...')
+            div = 0
         return price, div
     except:
         raise Exception('There was a problem updating %s...' % (ticker))
